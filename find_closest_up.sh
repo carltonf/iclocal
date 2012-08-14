@@ -1,0 +1,62 @@
+#!/bin/sh
+
+function search_closest_up() {
+    # usage: search_closest_up <search_file_name> [start_dir [end_dir]]
+    local search_file="$1"
+
+    # default is to search from current directory towards $ANDROID_BUILD_TOP
+    local start_dir=
+    local end_dir=
+    if [ -z $2 ]; then
+        start_dir=`pwd`
+    else
+        start_dir=$2
+    fi
+    if [ -z $3 ]; then
+        end_dir=$ANDROID_BUILD_TOP
+    else
+        end_dir=$3
+    fi
+    
+    local dir=$start_dir
+    local found=$(ls $dir | grep $search_file)
+    while [ -z "$found" -a "$dir" != "$end_dir" -a "$dir" != "." -a "$dir" != "/" ]; do
+        dir=$(dirname $dir)
+        found=$(ls $dir | grep $search_file)
+    done
+
+    local target_dir=
+    if [ -z "$found" ]; then
+        # echo "can't find \"$search_file\" upwards"
+        target_dir=
+    else
+        # echo "find \"$search_file\" at \"$dir\""
+        target_dir=$dir
+    fi
+
+    # return the target dir
+    echo $target_dir
+}
+
+function test(){
+    local all_dirs=(`git status -s | cut -c 4- | xargs -n1 dirname | sort | uniq`)
+
+    local all_target_dirs=()
+
+    local d=
+    local ret=
+    local index=0
+    for d in ${all_dirs[@]}; do
+        ret=$(search_closest_up Makefile $d .)
+        if [ -n $ret ]; then
+            all_target_dirs[$index]=$ret
+            let "index = $index + 1"
+        fi
+    done
+
+    all_target_dirs=(`echo ${all_target_dirs[@]} | xargs -n1 | sort | uniq`)
+
+    echo ${all_target_dirs[@]}
+}
+
+test

@@ -1,0 +1,5 @@
+Personal binary files
+
+1. Personal data files.
+
+2. For everything you need to run directly, make a symlink in "$HOME/bin".
