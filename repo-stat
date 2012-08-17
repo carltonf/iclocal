@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# simple script to gather status report of all my repos
+
+REPO_LIST=(                                     \
+    xbin                                        \
+    icwiki                                      \
+    etc                                         \
+)
+
+for repo in ${REPO_LIST[@]}; do
+    echo -e "\n******* Repo: $repo *******"
+    cd "$HOME/$repo" 1>/dev/null
+    git status -s
+    cd - 1>/dev/null
+done
