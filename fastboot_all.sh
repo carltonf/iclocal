@@ -1,19 +1,9 @@
 #!/bin/bash
 
-echo "Ha, so you are lazy....fastboot-flash-all!!!!"
+usage(){
+    echo "$0 [boot] [images_path]"
+}
 
-if [ $# -lt 1 ]; then
-    echo "WARNING: '$OUT' will be used."
-    echo "Normally you should give the path to out directory as argument, a common one is `pwd`."
-    OUT_DIR="$OUT"
-else
-    OUT_DIR="$1"
-fi
-
-if [ ! -d "$OUT_DIR" ]; then
-    echo "You Fool, \"$OUT_DIR\" is __not__ a directory."
-    exit 1
-fi
 
 FASTBOOT_FLASH_CMD='fastboot flash'
 
@@ -55,28 +45,94 @@ SYSTEM_IMG="system.img"
 PERSIST_IMG="persist.img"
 RECOVERY_IMG="recovery.img"
 
-cd $OUT_DIR
-if [ $TARGET_PRODUCT = 'u20' ]; then
-    USERDATA_IMG="$USERDATA_IMG.ext4.spa"
-    SYSTEM_IMG="$SYSTEM_IMG.ext4.spa"
-elif [ $TARGET_PRODUCT = 'u10' ]; then
-    # default images setting is OK
-    echo > /dev/null
-elif [ $TARGET_PRODUCT = 'msm7627a' ]; then
-    USERDATA_IMG="$USERDATA_IMG.ext4"
-    SYSTEM_IMG="$SYSTEM_IMG.ext4"
-    PERSIST_IMG="$PERSIST_IMG.ext4"
-else
-    echo "*** Have you sourced the envsetup.sh? Aborted!"
-    exit -1
+# extended area
+#
+# Add a new product with special images settings
+case "$TARGET_PRODUCT" in
+    "u10")
+        # default images setting is OK
+        echo > /dev/null
+        ;;
+    "u20")
+        USERDATA_IMG="$USERDATA_IMG.ext4.spa"
+        SYSTEM_IMG="$SYSTEM_IMG.ext4.spa"
+        ;;
+    "msm7627a")
+        USERDATA_IMG="$USERDATA_IMG.ext4"
+        SYSTEM_IMG="$SYSTEM_IMG.ext4"
+        PERSIST_IMG="$PERSIST_IMG.ext4"
+        ;;
+    "tr761")
+        BOOT_IMG="boot.2knand.img"
+        USERDATA_IMG="userdata.2knand.img"
+        SYSTEM_IMG="system.2knand.img"
+        PERSIST_IMG="persist.2knand.img"
+        RECOVERY_IMG="recovery.2knand.img"
+        ;;
+    *)
+        echo "*** Have you sourced the envsetup.sh and choosecombo-ed? Aborted!"
+        exit -1
+        ;;
+esac
+
+flash_all(){
+    # do the real flashing
+    safe_fastflash boot $BOOT_IMG
+    safe_fastflash userdata $USERDATA_IMG
+    safe_fastflash system $SYSTEM_IMG
+    safe_fastflash persist $PERSIST_IMG
+    safe_fastflash recovery $RECOVERY_IMG
+}
+
+flash_single(){
+    case $TARGET_IMAGE in
+        "boot")
+            safe_fastflash boot $BOOT_IMG
+            ;;
+        *)
+            echo "Unsupported partitions. Only boot is supported for now."
+            exit 5
+            ;;
+    esac
+}
+
+################ main ################
+echo "Ha, so you are lazy....fastboot-flash-all!!!!"
+
+# parameter parsing
+case $# in
+    0)
+        echo "WARNING: '$OUT' will be used. ALL will be flashed."
+        echo "Normally you should give the path to out directory as argument "      \
+            "a common one is '.' or '`pwd`'."
+        usage
+        OUT_DIR="$OUT"
+        ;;
+    1)
+        OUT_DIR="$1"
+        ;;
+    2)
+        TARGET_IMAGE="$1"
+        OUT_DIR="$2"
+        ;;
+    *)
+        echo "Too many arguments."
+        usage
+        exit 4
+        ;;
+esac
+
+if [ ! -d "$OUT_DIR" ]; then
+    echo "You Fool, \"$OUT_DIR\" is __not__ a directory."
+    exit 1
 fi
 
-# do the real flashing
-safe_fastflash boot $BOOT_IMG
-safe_fastflash userdata $USERDATA_IMG
-safe_fastflash system $SYSTEM_IMG
-safe_fastflash persist $PERSIST_IMG
-safe_fastflash recovery $RECOVERY_IMG
+cd $OUT_DIR
+if [ -z "$TARGET_IMAGE" ]; then
+    flash_all
+else
+    flash_single
+fi
 
 fastboot reboot
 adb wait-for-device
