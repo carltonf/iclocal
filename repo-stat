@@ -11,6 +11,8 @@ REPO_LIST=(                                     \
 for repo in ${REPO_LIST[@]}; do
     echo -e "\n******* Repo: $repo *******"
     cd "$HOME/$repo" 1>/dev/null
+    # TODO this should be simplified
+    git status | grep -e '\(ahead\|behind\)' | sed 's|.*\(behind\).*\([0-9][0-9]* commit\).*|** \2 \1|g'
     git status -s
     cd - 1>/dev/null
 done
