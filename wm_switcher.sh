@@ -4,7 +4,6 @@
 wnd_class="$1"
 
 wnd_history_file="$HOME/.cache/dmenu_nav_history.log"
-
 idx=$(grep "$wnd_class" "$wnd_history_file" | cut -d' ' -f 1 | tail -1)
 
 if [[ -n "$idx" ]]; then
@@ -23,6 +22,6 @@ else
         dmenu_nav
     else
         echo "No special choice and multiple instances. Switching using class name."
-        wmctrl -x -a "$wnd_class"
+        wmctrl -i -a $(wmctrl -x -l | grep -i "$wnd_class" | cut -d' ' -f 1)
     fi
 fi
