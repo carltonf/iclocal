@@ -9,11 +9,6 @@
 #
 # NOTE: make sure this script is in the PATH of the rxvt-unicode.
 
-if [ -z "$TMUX" ]; then
-    echo "Error: Sorry, only works with urxvt+tmux."
-    exit 1
-fi
-
 # change this if your shell's name is not bash
 SHELL_REG="[b]ash"
 
