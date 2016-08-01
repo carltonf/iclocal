@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Simple wrapper around `emacsclient` that connects to host's Emacs server.
+
+# Note that there is no `emacs` installed and `emacsclient` in this directory
+# is an binary copy from official 24.5-4.
+#
+
+function help () {
+  echo -e '* For this script to work, multiple configurations across' \
+          'host and vm need to orchestrate together.\n'               \
+          'Read specific notes in README.md for details. '
+}
+
+# for convenience
+serverfile="$HOME/local/bin/crystal-host-emacs.serverfile"
+# only one argument is accepted: the path name (be absolute, so it can be mapped)
+path=$(realpath $1)
+# samba mapped driver
+MAPPED_DRIVE=O
+
+# NOTE path to `servefile` must be absolute
+emacsclient --server-file="$serverfile" -n "$MAPPED_DRIVE:$path"
+
+if [[ $? -ne 0 ]]; then
+  echo "* Oops! Something goes wrong."
+  help
+fi
