@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Simple wrapper around `emacsclient` that connects to host's Emacs server.
 
@@ -14,10 +14,25 @@ function help () {
 
 # for convenience
 serverfile="$HOME/local/bin/crystal-host-emacs.serverfile"
-# only one argument is accepted: the path name (be absolute, so it can be mapped)
-path=$(realpath $1)
 # samba mapped driver
 MAPPED_DRIVE=O
+# samba path mapping
+function samba_vfs_catia_map () {
+  local unix_path=$(realpath $1)
+  local mapped_path=$unix_path
+  # NOTE: incomplete, for practical use only. It's a tedious task to list all
+  # special char mapping here and in practice, most files avoid these chars
+  # anyway.
+  #
+  # The complete mapping rules can be found at:
+  # https://www.samba.org/samba/docs/man/manpages/vfs_catia.8.html
+  # The rule itself is the same as what's set in samba
+  mapped_path=${mapped_path//:/÷}   # obs uses this.
+
+  echo $mapped_path
+}
+# only one argument is accepted: the path name (be absolute, so it can be mapped)
+path=$(samba_vfs_catia_map $1)
 
 # NOTE path to `servefile` must be absolute
 emacsclient --server-file="$serverfile" -n "$MAPPED_DRIVE:$path"
