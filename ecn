@@ -16,14 +16,14 @@ function help () {
 # NOTE: requiring corresponding configurations from Emacs-side for this to work.
 SERVERFILE="/tmp/crystal-host-emacs.serverfile"
 function _generate_serverfile () {
-  HOST=crystal-host
+  HOST_IP=172.28.128.1
   PORT=57777
   PID='*'
   # TODO maybe we can store this in `pass`, but connecting to host emacs
   # doesn't need any security measure.
   AUTH_TOKEN='mUN/:r=V}\|1F]LjX6:fz|!_|a@-7mu^-U2xVv<?*4I:FrZj"lTdl;G;Ox`A4G7L'
   # NOTE shell pitfall, '$1' has to be escaped, otherwise it gets expanded
-  HOST_IP=$(awk "/^[^#].*$HOST/ { print \$1 }" /etc/hosts)
+  # HOST_IP=$(awk "/^[^#].*$HOST/ { print \$1 }" /etc/hosts)
   # NOTE assumed no name conflicts possible, o/w use `mktemp` to make this work
 
   cat > $SERVERFILE <<- END
