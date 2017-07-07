@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 07/08/2017: Good for bare-metal, for images use vagrant or packer
+
 # Scripts to enable a newly installed machine for development.
 #
 # Requirements & Features:

@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# An /etc/hosts manager bash script
 # Forked from https://gist.github.com/mikeflynn/4278796
 #
 # NOTE: Heavily modified. Only the working sub commands are printed out in usage.

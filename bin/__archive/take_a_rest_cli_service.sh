@@ -29,7 +29,7 @@ case $1 in
             _start_rest
         else
             echo "** some instances are running, please stop them first."
-        fi        
+        fi
         ;;
     stop)
         echo "** stop all instances"
@@ -59,8 +59,8 @@ case $1 in
             _start_rest
         else
             echo "** some instances are running, please stop them first."
-        fi        
+        fi
         ;;
     *)
-        
+
 esac

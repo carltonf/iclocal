@@ -17,7 +17,7 @@ function search_closest_up() {
     else
         end_dir=$3
     fi
-    
+
     local dir=$start_dir
     local found=$(ls $dir | grep $search_file)
     while [ -z "$found" -a "$dir" != "$end_dir" -a "$dir" != "." -a "$dir" != "/" ]; do
