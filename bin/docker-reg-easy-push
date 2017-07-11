@@ -8,3 +8,5 @@ image="$1"
 
 docker tag $image $SERVER/$image
 docker push $SERVER/$image
+docker image rm $SERVER/$image
+
