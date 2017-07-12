@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Simple wrapper for working with my private docker registry
+
+### Server BEGIN
+LOCAL_DOCKER_REG_ROOTDIR="/vagrant/public/docker-registry"
+
+function server_run {
+    # NOTE `--rm` is added as restarting registry container doesn't seem to work
+    # with vboxsf
+    docker run --rm -d -p 5000:5000 --name registry \
+           -v $LOCAL_DOCKER_REG_ROOTDIR:/var/lib/registry \
+           registry:2
+}
+
+function server_img_list {
+    echo "* List all images in $LOCAL_DOCKER_REG_ROOTDIR:"
+    local TMPFILE=$(mktemp)
+
+    # An example of unfiltered path of imagehlp
+    # : $LOCAL_DOCKER_REG_ROOTDIR/docker/registry/v2/repositories/carltonf/jekyll-toolbox/_manifests/tags/20160808/current
+    find $LOCAL_DOCKER_REG_ROOTDIR -print \
+        | grep -o 'v2/repositories/.*/current$'                       \
+        | sed -e 's/\/_manifests\/tags\//:/'                          \
+              -e 's/\/current//'                                      \
+              -e 's/^.*repositories\//    /'                          \
+        | sort | tee $TMPFILE
+
+    local num_imgs=`wc -l $TMPFILE | awk {'print $1'}`
+    local total_size=`du -hs $LOCAL_DOCKER_REG_ROOTDIR | awk {'print $1'}`
+    echo "Number of images: $num_imgs"
+    echo "Disk space used: $total_size"
+
+    # clean up
+    rm $TMPFILE
+}
+### END
+
+### Client BEGIN
+SERVER=crystal.cw:5000
+
+function client_easy_pull {
+    local image="$1"
+
+    docker pull $SERVER/$image
+    docker tag $SERVER/$image $image
+    docker image rm $SERVER/$image
+}
+
+function client_easy_push {
+    local image="$1"
+
+    docker tag $image $SERVER/$image
+    docker push $SERVER/$image
+    docker image rm $SERVER/$image
+}
+### END
+
+CMD_LIST="run img-list easy-pull easy-push help"
+
+function help {
+    echo "Availalbe Commands: $CMD_LIST"
+}
+
+cmd="$1"
+case $cmd in
+    "run")
+        server_run
+        ;;
+    "img-list")
+        server_img_list
+        ;;
+    "easy-pull")
+        client_easy_pull "$2"
+        ;;
+    "easy-push")
+        client_easy_push "$2"
+        ;;
+    "help")
+        help
+        ;;
+    *)
+        echo "* Error: invalid command '$cmd'"
+        help
+        exit 1
+        ;;
+esac
