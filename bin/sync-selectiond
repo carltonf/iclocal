@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Sync PRIMARY and CLIPBOARD selections. A cure for the X/GNOME selection madness
+# Ref: https://unix.stackexchange.com/a/178401
+# Ref: https://superuser.com/a/177541
+
+# WARNING: the selections are case-sensitive
+
+autocutsel &
+autocutsel -s PRIMARY &
