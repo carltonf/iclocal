@@ -16,11 +16,12 @@ Detailed documentation about individual tool might be found in bin/README.md
 
 NOT in the PATH
 
-Used my `bin`, auxillary library routines.
+Used `local/bin` or sourced by Shell initialization scripts, auxillary library
+routines.
 
 ## xbin 
 
 In the PATH
 
 For 3rd party tools, unless explicitly unmasked in its .gitignore, all files
-are ignored by Git. So this is where we put temporary other tools
+are ignored by Git. So this is where we put temporary external tools
