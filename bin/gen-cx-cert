@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# signing test server domain with my own CA
+# ref: https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309
+fqdn=$1
+if [[ -z $fqdn ]]; then
+   echo '[ERROR] no domain name given.'
+   exit 1
+fi
+
+ROOT_CA=$HOME/local/lib/rootCA
+
+set -x 
+
+# create the certificate key
+openssl genrsa -out "$fqdn.key" 2048
+
+# create the certificate signing request
+openssl req -new -sha256 \
+    -key "$fqdn.key" \
+    -subj "/C=CN/ST=CA/O=MyOrg, Inc./CN=$fqdn" \
+    -reqexts SAN \
+    -config <(cat /etc/ssl/openssl.cnf \
+        <(printf "\n[SAN]\nsubjectAltName=DNS:$fqdn,DNS:$fqdn")) \
+    -out "$fqdn.csr"
+
+# inspect the request
+# openssl req -in "$fqdn.csr" -noout -text
+
+# signing the server certificate
+# short expiration time to impose discipline
+openssl x509 -req -sha256 -in "$fqdn.csr" \
+    -CA "$ROOT_CA/cx.crt" -CAkey "$ROOT_CA/cx.key" -CAcreateserial \
+    -out "$fqdn.crt" -days 14 
+
+# inspect the certificate
+# openssl x509 -in "$fqdn.crt" -text -noout
+
