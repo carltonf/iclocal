@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Conventions
+# - Structure: center(remote hubs) > hub(remotes) > node(local)
+
+cd "$( dirname "$0" )"
+
+usage() {
+  echo " Please specify: center, hub or node."
+}
+
+if [ $# -eq 0 ]; then
+  echo "No arguments provided."
+  usage
+  exit 1
+fi
+
+start_center() {
+  echo "Starting hubs..."
+  tmux -L center.sock -f center.conf at
+}
+
+start_hub() {
+  echo "Starting remotes..."
+  tmux -L hub.sock -f hub.conf at
+}
+
+start_local() {
+  echo "Starting local..."
+  # Not relying on the default even for the local tmux
+  # node.conf is traditionally `~/.tmux.conf`
+  tmux -L local.sock -f node.conf at
+}
+
+case "$1" in
+  "center")
+    start_center
+    ;;
+  "hub")
+    start_hub
+    ;;
+  "node")
+    start_node
+    ;;
+  *)
+    echo "Invalid argument $1." >&2
+    usage
+    exit 1
+    ;;
+esac
