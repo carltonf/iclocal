@@ -17,19 +17,19 @@ fi
 
 start_center() {
   echo "Starting hubs..."
-  tmux -L center.sock -f center.conf at
+  tmux -S ./center.sock -f center.conf at
 }
 
 start_hub() {
   echo "Starting remotes..."
-  tmux -L hub.sock -f hub.conf at
+  tmux -S ./hub.sock -f hub.conf at
 }
 
-start_local() {
+start_node() {
   echo "Starting local..."
   # Not relying on the default even for the local tmux
   # node.conf is traditionally `~/.tmux.conf`
-  tmux -L local.sock -f node.conf at
+  tmux -S ./node.sock -f node.conf at
 }
 
 case "$1" in
